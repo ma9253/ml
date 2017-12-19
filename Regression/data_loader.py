@@ -100,22 +100,51 @@ class DataReader:
         test_data_indexs = ids.apply(lambda id:get_last_byte_of_hash(id,testSetPercentage,hash))
         return data_with_id.loc[~test_data_indexs], data_with_id.loc[test_data_indexs]
 
-    def stratified_train_test_split(self,columnName,testSetPercentage=0.2):
+    def stratified_train_test_split(self,normalizedColumnName,normalizedValue,mergingValue, testSetPercentage=0.2,labelColumn=''):
+        """
+        make stratified train and test split
+        :param normalizedColumnName:
+        :param normalizedValue:
+        :param mergingValue:
+        :param testSetPercentage:
+        :param labelColumn:
+        :return: train and test set
+        """
         data= self.load_data()
-        data["income_cat"]=np.ceil(data[columnName]/1.5)
-        data["income_cat"].where(data["income_cat"]<5,5,inplace=True)
-        print(data["income_cat"].value_counts()/len(data))
+        # make a new column for the standardized values of normalized column and do stratified sampling based on that column
+        helper_column_name = "income_cat"
+        data[helper_column_name]=np.ceil(data[normalizedColumnName]/normalizedValue)
+        data[helper_column_name].where(data[helper_column_name]<mergingValue,mergingValue,inplace=True)
+        # print(data[helper_column_name].value_counts()/len(data))
 
         split= StratifiedShuffleSplit(n_splits=1,test_size=testSetPercentage,random_state=92)
-        # print(data.head())
-        for train_index,test_index in split.split(data,data["income_cat"]):
+        for train_index,test_index in split.split(data,data[helper_column_name]):
             train_set= data.loc[train_index]
             test_set = data.loc[test_index]
+        # removing helper column
+        for set in (train_set,test_set):
+            set.drop([helper_column_name],axis=1,inplace=True)
+        if labelColumn:
+            train_data = train_set.drop(labelColumn,axis=1)
+            train_labels = train_set[labelColumn].copy()
 
-data_reader = DataReader()
+            test_data = test_set.drop(labelColumn, axis=1)
+            test_labels = test_set[labelColumn].copy()
+            return train_data,train_labels, test_data, test_labels
+
+        return train_set,test_set
+
+# data_reader = DataReader()
 # data_reader.analyze_data()
 # data_reader.analyze_data_for_categorical_features()
 # data_reader.analyze_data_for_numerical_features()
 # data_reader.plot_histogram_of_data_columns()
 # train,test=data_reader.split_train_test(0.2,'longitude','latitude')
-data_reader.stratified_train_test_split("median_income",0.2)
+# train,test = data_reader.stratified_train_test_split("median_income",1.5,5, 0.2,'median_house_value')
+# d= train.copy()
+# corr_matrix = d.corr()
+# print(corr_matrix['median_house_value'].sort_values(ascending=False))
+
+# d.plot(kind="scatter",x='longitude',y='latitude', alpha=0.4, s=d['population']/100,label='population',c=d['median_house_value'],cmap=plt.get_cmap('jet'),colorbar=True,)
+# plt.legend()
+# plt.show()
