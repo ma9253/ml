@@ -21,7 +21,7 @@ class AttributesCombiner(BaseEstimator,TransformerMixin):
         rooms_per_household=X[:,self.rooms_column_index]/X[:,self.household_column_index]
         population_per_household = X[:,self.population_column_index]/X[:,self.household_column_index]
         bedrooms_per_rooms = X[:,self.bedrooms_column_index]/X[:,self.rooms_column_index]
-        # concatinating and return the results
+        # concatinating and returning the results
         return np.c_[X,rooms_per_household,population_per_household,bedrooms_per_rooms]
 
 

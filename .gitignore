@@ -1,0 +1,8 @@
+*.swp
+*.swo
+*.sw*
+*.pyc
+*.iml
+*.xml
+.idea/*
+.idea/workspace.xml

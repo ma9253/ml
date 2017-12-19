@@ -117,7 +117,7 @@ class DataReader:
         data[helper_column_name].where(data[helper_column_name]<mergingValue,mergingValue,inplace=True)
         # print(data[helper_column_name].value_counts()/len(data))
 
-        split= StratifiedShuffleSplit(n_splits=1,test_size=testSetPercentage,random_state=92)
+        split= StratifiedShuffleSplit(n_splits=1,test_size=testSetPercentage,random_state=100)
         for train_index,test_index in split.split(data,data[helper_column_name]):
             train_set= data.loc[train_index]
             test_set = data.loc[test_index]
